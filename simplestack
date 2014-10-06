@@ -33,7 +33,7 @@ parameters:
   vol_size:
     type: number
     description: The size of the Cinder volume
-    default: 1
+    default: 8
  
 resources:
   my_instance:
@@ -48,6 +48,7 @@ resources:
     type: OS::Cinder::Volume
     properties:
       size: { get_param: vol_size }
+      volume_type: ScaleIO
  
   vol_att:
     type: OS::Cinder::VolumeAttachment
