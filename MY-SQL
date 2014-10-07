@@ -8,6 +8,7 @@ parameters:
   key_name:
     type: string
     description : Name of a KeyPair to enable SSH access to the instance
+    default: test_keypair
   instance_type:
     type: string
     description: Instance type for database server
