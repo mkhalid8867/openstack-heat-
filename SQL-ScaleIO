@@ -1,0 +1,107 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Heat  template. This template installs a MySQL database to store the data.
+
+parameters:
+
+  key_name:
+    type: string
+    description : Name of a KeyPair to enable SSH access to the instance
+    default: test_keypair
+  instance_type:
+    type: string
+    description: Instance type for database server
+    default: m1.small
+    constraints:
+      - allowed_values: [m1.small, m1.medium, m1.large]
+        description: instance_type must be one of m1.small, m1.medium or m1.large
+  
+  network:
+    type: string
+    description: The network for the VM
+    default: net04
+
+
+  db_name:
+    type: string
+    description: database name
+    default: MYSQL
+    constraints:
+      - length: { min: 1, max: 64 }
+        description: db_name must be between 1 and 64 characters
+      - allowed_pattern: '[a-zA-Z][a-zA-Z0-9]*'
+        description: >
+          db_name must begin with a letter and contain only alphanumeric
+          characters
+  db_username:
+    type: string
+    description: The database admin account username
+    default: admin
+    hidden: true
+    constraints:
+      - length: { min: 1, max: 16 }
+        description: db_username must be between 1 and 16 characters
+      - allowed_pattern: '[a-zA-Z][a-zA-Z0-9]*'
+        description: >
+          db_username must begin with a letter and contain only alphanumeric
+          characters
+  db_password:
+    type: string
+    description: The  database admin account password
+    default: admin
+    hidden: true
+    constraints:
+      - length: { min: 1, max: 41 }
+        description: db_password must be between 1 and 41 characters
+      - allowed_pattern: '[a-zA-Z0-9]*'
+        description: db_password must contain only alphanumeric characters
+  db_root_password:
+    type: string
+    description: Root password for MySQL
+    default: admin
+    hidden: true
+    constraints:
+      - length: { min: 1, max: 41 }
+        description: db_root_password must be between 1 and 41 characters
+      - allowed_pattern: '[a-zA-Z0-9]*'
+        description: db_root_password must contain only alphanumeric characters
+
+resources:
+  sql_instance:
+    type: OS::Nova::Server
+    properties:
+      flavor: { get_param: instance_type }
+      block_device_mapping: [{volume_id: 905bd2ad-9b1b-4704-b822-03b503624fea, device_name: vda}]
+      key_name: { get_param: key_name }
+      networks: [{network: {get_param: network} }]
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+
+            yum -y install mariadb mariadb-server
+            touch /var/log/mariadb/mariadb.log
+            chown mysql.mysql /var/log/mariadb/mariadb.log
+            systemctl start mariadb.service
+
+            # Setup MySQL root password and create a user
+            mysqladmin -u root password db_rootpassword
+            cat << EOF | mysql -u root --password=db_rootpassword
+            CREATE DATABASE db_name;
+            GRANT ALL PRIVILEGES ON db_name.* TO "db_user"@"%"
+            IDENTIFIED BY "db_password";
+            FLUSH PRIVILEGES;
+            EXIT
+            EOF
+          params:
+            db_rootpassword: { get_param: db_root_password }
+            db_name: { get_param: db_name }
+            db_user: { get_param: db_username }
+            db_password: { get_param: db_password }
+
+
+outputs:
+  instance_networks:
+    description: The IP addresses of the deployed instance
+    value: { get_attr: [sql_instance, networks] }
