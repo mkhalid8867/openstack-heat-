@@ -72,7 +72,7 @@ resources:
     type: OS::Nova::Server
     properties:
       flavor: { get_param: instance_type }
-      block_device_mapping: [{volume_id: cae42c67-396f-4848-9cc5-7fc7e401ff62, device_name: vda}]
+      block_device_mapping: [{volume_id: dc9cbd15-14a9-4785-9bbb-e2dc44063002, device_name: vda}]
       key_name: { get_param: key_name }
       networks: [{network: {get_param: network} }]
       user_data:
