@@ -15,7 +15,7 @@ parameters:
   flavor:
     type: string
     description: Flavor for the instance to be created
-    default: m1.small
+    default: m1.tiny
     constraints:
       - custom_constraint: nova.flavor
         description: Must be a flavor known to Nova
@@ -29,11 +29,11 @@ parameters:
   network:
     type: string
     description: The network for the VM
-    default: net04
+    default: 
   vol_size:
     type: number
     description: The size of the Cinder volume
-    default: 8
+    default: 1
  
 resources:
   my_instance:
