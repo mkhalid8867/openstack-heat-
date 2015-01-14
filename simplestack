@@ -3,7 +3,7 @@ heat_template_version: 2013-05-23
 
 description: >
   A HOT template that holds a VM instance with an attached
-  Scale IO Cinder volume.  Demonstrates ScaleIO in an OpenStack environment
+ Cinder volume.  
  
 parameters:
   key_name:
@@ -48,7 +48,7 @@ resources:
     type: OS::Cinder::Volume
     properties:
       size: { get_param: vol_size }
-      volume_type: ScaleIO
+      volume_type: lvmdriver-1
  
   vol_att:
     type: OS::Cinder::VolumeAttachment
